@@ -1,0 +1,28 @@
+{
+  "name": "rocketchat-emoji-bulk-upload",
+  "version": "1.0.0",
+  "description": "A Node.js script to bulk import custom emojis from a YAML file into a Rocket.Chat instance using the Rocket.Chat API.",
+  "main": "import-custom-emojis.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anefzaoui/rocketchat-emoji-bulk-upload"
+  },
+  "scripts": {
+    "start": "node import-custom-emojis.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "rocket.chat",
+    "emoji",
+    "bulk upload",
+    "import",
+    "api"
+  ],
+  "author": "Ahmed Nefzaoui",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "readline": "^1.3.0",
+    "request": "^2.88.2"
+  }
+}
