@@ -1,3 +1,4 @@
+require("dotenv").config();
 const request = require("request");
 const yaml = require("js-yaml");
 const fs = require("fs");
@@ -8,10 +9,24 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-rl.question("URL for YAML file? ", (emojiYamlUrl) => {
-  rl.question("Rocket.Chat server URL? ", (rocketchatServerUrl) => {
-    rl.question("Rocket.Chat admin username? ", (adminUsername) => {
-      rl.question("Rocket.Chat admin password? ", (adminPassword) => {
+const rocketchatServerUrl = process.env.ROCKETCHAT_SERVER_URL || "";
+const adminUsername = process.env.ADMIN_USERNAME || "";
+const adminPassword = process.env.ADMIN_PASSWORD || "";
+
+function promptForValue(message, currentValue, callback) {
+  if (currentValue) {
+    callback(currentValue);
+  } else {
+    rl.question(message, (value) => {
+      callback(value);
+    });
+  }
+}
+
+promptForValue("URL for YAML file? ", "", (emojiYamlUrl) => {
+  promptForValue("Rocket.Chat server URL? ", rocketchatServerUrl, (finalRocketchatServerUrl) => {
+    promptForValue("Rocket.Chat admin username? ", adminUsername, (finalAdminUsername) => {
+      promptForValue("Rocket.Chat admin password? ", adminPassword, (finalAdminPassword) => {
         rl.close();
 
         // Login to Rocket.Chat
@@ -85,6 +100,8 @@ rl.question("URL for YAML file? ", (emojiYamlUrl) => {
                         console.error("Error uploading emoji:", uploadResponseBody.error);
                         return;
                       }
+
+                      console.log(`Successfully added an new emoji: ${name}`);
 
                       uploadedEmojisCount++;
 

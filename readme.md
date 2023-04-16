@@ -1,7 +1,7 @@
 Rocket.Chat Custom Emoji Importer
 =================================
 
-This repository contains a Node.js script to import custom emojis from a YAML file into a Rocket.Chat instance. The script uses the Rocket.Chat API, making it easy to bulk import custom emojis without directly accessing the database.
+This repository contains a Node.js script to import custom emojis from a YAML file into a Rocket.Chat instance. The script uses the Rocket.Chat API, making it easy to bulk import custom emojis without directly accessing the database. It also supports using a `.env` file to store the Rocket.Chat server URL, admin username, and password.
 
 Features
 --------
@@ -11,6 +11,7 @@ Features
 *   Command-line interface for user input
 *   Automatic download and upload of custom emoji images
 *   Bulk import support
+*   Support for `.env` file to store server URL and admin credentials
 
 Requirements
 ------------
@@ -27,30 +28,44 @@ The following Node.js packages are used in this script:
 *   `request`: To perform HTTP requests and interact with the Rocket.Chat API
 *   `js-yaml`: To parse YAML files
 *   `readline`: To read user inputs from the command line
+*   `dotenv`: To load environment variables from a `.env` file
 
 Installation
 ------------
 
 1.  Clone this repository:
-        
+    
     ```bash
-    git clone https://github.com/yourusername/rocketchat-custom-emoji-importer.git
-    cd rocketchat-custom-emoji-importer
+    git clone https://github.com/anefzaoui/rocketchat-emoji-bulk-upload.git
+    cd rocketchat-emoji-bulk-upload
     ```
     
 2.  Install the required dependencies:
-        
-    `npm install`
     
+    `npm install`
 
 Usage
 -----
 
-1.  Run the script:
-        
+1.  Optionally, create a `.env` file in the project directory with the following content:
+    
+
+    ```ini
+    ROCKETCHAT_SERVER_URL=https://your-rocketchat-server-url 
+    ADMIN_USERNAME=your-admin-username
+    ADMIN_PASSWORD=your-admin-password
+    ```
+    
+    Replace the placeholder values with your actual Rocket.Chat server URL, admin username, and password. The script will use these values if they are set in the `.env` file, otherwise, it will prompt the user to input them.
+
+    **Note**: There is a `.env.example` file included in this repository that you can use as a template. Simply rename it to `.env` and fill in your information.
+
+    
+2.  Run the script:
+    
     `node import-custom-emojis.js`
     
-2.  Follow the prompts and provide the required information:
+3.  If you haven't provided the necessary information in the `.env` file, follow the prompts and provide the required information:
     
     *   URL for the YAML file containing the custom emojis
     *   Rocket.Chat server URL
