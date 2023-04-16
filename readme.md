@@ -33,7 +33,10 @@ Installation
 
 1.  Clone this repository:
         
-    `git clone https://github.com/yourusername/rocketchat-custom-emoji-importer.git cd rocketchat-custom-emoji-importer`
+    ```bash
+    git clone https://github.com/yourusername/rocketchat-custom-emoji-importer.git
+    cd rocketchat-custom-emoji-importer
+    ```
     
 2.  Install the required dependencies:
         
