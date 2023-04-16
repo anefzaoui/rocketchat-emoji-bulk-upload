@@ -7,11 +7,32 @@ Features
 --------
 
 *   Import custom emojis from a remote YAML file
+    
+    The script allows you to easily import custom emojis from a remote YAML file by providing the file's URL. The YAML file should contain the emoji names and image sources in a well-structured format.
+    
 *   Uses the Rocket.Chat API for easy and secure integration
+    
+    This script interacts with your Rocket.Chat server using the official API, ensuring a secure and straightforward integration process. You will need to provide your admin username and password to authenticate with the API.
+    
 *   Command-line interface for user input
+    
+    The script uses a simple command-line interface to gather required information, such as the YAML file URL, Rocket.Chat server URL, and admin credentials, making it easy to run and configure.
+    
 *   Automatic download and upload of custom emoji images
+    
+    The script takes care of downloading the custom emoji images from the URLs specified in the YAML file and uploading them to your Rocket.Chat server. This automated process simplifies the bulk import of custom emojis.
+    
 *   Bulk import support
+    
+    This script is designed to handle multiple custom emojis at once, allowing you to import a large number of emojis in a single run, saving you time and effort.
+    
 *   Support for `.env` file to store server URL and admin credentials
+    
+    You can create a `.env` file in the project folder to store your Rocket.Chat server URL, admin username, and password. This helps to keep your credentials secure and simplifies running the script, as you won't need to input these values manually each time.
+    
+*   Skipping Existing Emojis
+    
+    This script has been updated to check for existing custom emojis on your Rocket.Chat server before uploading new ones. If an emoji from the YAML file is already present on the server, the script will skip uploading that emoji and print a message to inform you that it has been skipped. This helps to prevent duplicate emojis from being uploaded if you run the script multiple times using the same YAML file.
 
 Requirements
 ------------

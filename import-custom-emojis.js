@@ -1,8 +1,8 @@
-require("dotenv").config();
 const request = require("request");
 const yaml = require("js-yaml");
-const fs = require("fs");
 const readline = require("readline");
+
+require("dotenv").config();
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -21,6 +21,28 @@ function promptForValue(message, currentValue, callback) {
       callback(value);
     });
   }
+}
+
+function fetchExistingEmojis(authToken, userId, callback) {
+  request.get(
+    {
+      url: `${rocketchatServerUrl}/api/v1/emoji-custom.list`,
+      headers: {
+        "X-Auth-Token": authToken,
+        "X-User-Id": userId,
+      },
+      json: true,
+    },
+    (error, response, body) => {
+      if (error) {
+        console.error("Error fetching existing emojis:", error);
+        return;
+      }
+
+      const existingEmojiNames = body.emojis ? body.emojis.update.map((emoji) => emoji.name) : [];
+      callback(existingEmojiNames);
+    }
+  );
 }
 
 promptForValue("URL for YAML file? ", "", (emojiYamlUrl) => {
@@ -47,71 +69,78 @@ promptForValue("URL for YAML file? ", "", (emojiYamlUrl) => {
             const authToken = loginBody.data.authToken;
             const userId = loginBody.data.userId;
 
-            request(emojiYamlUrl, (error, response, body) => {
-              if (error) {
-                console.error("Error fetching YAML:", error);
-                return;
-              }
+            fetchExistingEmojis(authToken, userId, (existingEmojiNames) => {
+              request(emojiYamlUrl, (error, response, body) => {
+                if (error) {
+                  console.error("Error fetching YAML:", error);
+                  return;
+                }
 
-              const emojiYaml = yaml.load(body);
-              const emojis = emojiYaml["emojis"];
+                const emojiYaml = yaml.load(body);
+                const emojis = emojiYaml["emojis"];
 
-              let uploadedEmojisCount = 0;
+                let uploadedEmojisCount = 0;
 
-              for (const emoji of emojis) {
-                const url = emoji.src;
-                const file = url.split("/").pop();
-                const [name, ext] = file.split(".");
+                for (const emoji of emojis) {
+                  const url = emoji.src;
+                  const file = url.split("/").pop();
+                  const [name, ext] = file.split(".");
 
-                request.get(url, { encoding: null }, (imageError, imageResponse, imageData) => {
-                  if (imageError) {
-                    console.error("Error downloading image:", imageError);
-                    return;
+                  if (existingEmojiNames.includes(name)) {
+                    console.log(`Emoji ${name} already exists, skipping upload`);
+                    continue;
                   }
 
-                  request.post(
-                    {
-                      url: `${rocketchatServerUrl}/api/v1/emoji-custom.create`,
-                      headers: {
-                        "X-Auth-Token": authToken,
-                        "X-User-Id": userId,
-                      },
-                      formData: {
-                        name,
-                        aliases: "",
-                        emoji: {
-                          value: imageData,
-                          options: {
-                            filename: `${name}.${ext}`,
-                            contentType: `image/${ext}`,
+                  request.get(url, { encoding: null }, (imageError, imageResponse, imageData) => {
+                    if (imageError) {
+                      console.error("Error downloading image:", imageError);
+                      return;
+                    }
+
+                    request.post(
+                      {
+                        url: `${rocketchatServerUrl}/api/v1/emoji-custom.create`,
+                        headers: {
+                          "X-Auth-Token": authToken,
+                          "X-User-Id": userId,
+                        },
+                        formData: {
+                          name: emoji.name,
+                          aliases: "",
+                          emoji: {
+                            value: imageData,
+                            options: {
+                              filename: `${name}.${ext}`,
+                              contentType: `image/${ext}`,
+                            },
                           },
                         },
                       },
-                    },
-                    (uploadError, uploadResponse, uploadBody) => {
-                      if (uploadError) {
-                        console.error("Error uploading emoji:", uploadError);
-                        return;
+                      (uploadError, uploadResponse, uploadBody) => {
+                        if (uploadError) {
+                          console.error("Error uploading emoji:" + emoji.name + " - Error: ", uploadError);
+                          return;
+                        }
+
+                        const uploadResponseBody = JSON.parse(uploadBody);
+
+                        if (!uploadResponseBody.success) {
+                          console.error("Error uploading emoji: " + emoji.name + " - Error: ", uploadResponseBody.error);
+                          return;
+                        }
+
+                        console.log(`Successfully added a new emoji: ${emoji.name}`);
+
+                        uploadedEmojisCount++;
+
+                        if (uploadedEmojisCount === emojis.length) {
+                          console.log(`Successfully added ${uploadedEmojisCount} new emojis`);
+                        }
                       }
-
-                      const uploadResponseBody = JSON.parse(uploadBody);
-
-                      if (!uploadResponseBody.success) {
-                        console.error("Error uploading emoji:", uploadResponseBody.error);
-                        return;
-                      }
-
-                      console.log(`Successfully added an new emoji: ${name}`);
-
-                      uploadedEmojisCount++;
-
-                      if (uploadedEmojisCount === emojis.length) {
-                        console.log(`Successfully added ${uploadedEmojisCount} new emojis`);
-                      }
-                    }
-                  );
-                });
-              }
+                    );
+                  });
+                }
+              });
             });
           }
         );
